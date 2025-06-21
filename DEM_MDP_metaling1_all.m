@@ -24,12 +24,6 @@ else
     sen = f.sen{senid};
     clear f
 end
-% % if nargin
-%     input = f.sentences{sen};
-% else
-%     input = f.sig_fixsylb_extend{1};
-% end
-% clear f
 
 alist = {'Sara', 'Tim', 'Pierre'};
 vlist = {'talk', 'help', 'eat'};
@@ -65,8 +59,6 @@ end
 %--------------------------------------------------------------------------
 B{2}(:,:,1) = spm_speye(Ns(2),Ns(2),-1); 
 B{2}(end,end,1) = 1;
-% B{2} = B{2} + eye(Ns(2))/exp(1) + spm_speye(Ns(2),Ns(2),-2)/exp(1) ...
-%     + spm_speye(Ns(2),Ns(2),-3)/exp(2) + spm_speye(Ns(2),Ns(2),-4)/exp(3);
 % % add inprecision
 B{1} = B{1};
 
@@ -146,8 +138,6 @@ mdp.T = 6;                      % number of updates
 mdp.A = A;                      % observation model
 mdp.B = B;                      % transition probabilities
 mdp.D = D;                      % prior over initial states
-% mdp.U = U;
-% mdp.o = input;
 mdp.Aname = {'what sylb'};
 mdp.Bname = {'Lemma', 'where'};
 % mdp.chi   = 1/16;
@@ -167,9 +157,9 @@ clear A B D
  
 % prior beliefs about initial states (in terms of counts_: D and d
 %--------------------------------------------------------------------------
-context{1} = 'university'; context{2} = 'store'; %context{3} = 'run game';
+context{1} = 'university'; context{2} = 'store'; 
 context{3} = 'flight'; 
-% context{5} = 'novel'; 
+
 
 D{1} = [1 1 1]';
 % D{2} = [1 0 0 0 0]'; % where in sentence
@@ -213,7 +203,7 @@ for f1 = 1:Ns(1) % context
     end
             
 end
-% define Z
+% define Z for syntax
 Z = cell(1, 4);
 Z{1}(:, 1) = [1 0 0 0]'; Z{1}(:, 2) = [0 0 0 1]';
 Z{2}(:, 1) = [0 1 0 0]'; Z{2}(:, 2) = [1 0 0 0]';
@@ -274,14 +264,6 @@ for ns = 1:nl
     A{4}(idx_p1, ns) = 1;
 end
 
-% for ns = 1:nm
-%     sem = adlist{ns};
-%     idx_ad = find(strcmp(m1, sem));
-%     if ~isempty(idx_ad)
-%         A{5}(idx_ad, ns) = 1;
-%     end
-% end
-
 for ksyn = 1:4
     A{ksyn} = spm_norm_exp(A{ksyn}, 2);
 end
@@ -296,22 +278,17 @@ mdp.D = D;                      % prior over initial states
 % the input can be defined as indexes of outcome list
 % mdp.o = sen;
 
+% gradient descent step size
 mdp.stepc = 128; % default 256
 mdp.stepo = 128; % default 128
 mdp.stepsyn = 8; % default 8
 mdp.steps = [16 16 16]; % [a v l] default [16 16 16]
-% mdp.stepa = 8;
-% mdp.stepr = 16;
-% mdp.stepp = 8;
-% mdp.stepm = 8;
 
 mdp.label.name{1} = context;
 mdp.label.name{2} = {'Order A', 'Order B'};
-% mdp.label.name{2} = {'1', '2', '3', '4', '5', '6', '7', '8'};
 mdp.label.name{3}   = alist;
 mdp.label.name{4}   = vlist;
 mdp.label.name{5}   = lolist;
-% mdp.label.name{6}   = adlist;
 mdp.label.name{6} = {'Attribute', 'Subject', 'Verb', 'Place'};
 mdp.label.factor   = {'Context', 'Order', 'Agent', 'Action', 'Location', 'Syntax'};
 % mdp         = spm_MDP_check(mdp);
@@ -336,6 +313,4 @@ spm_MDP_VB_ERP_ALL_metaling(MDP, sentence);
 % figure;
 % spm_MDP_VB_ERP_YS(MDP.mdp(4).mdp, 2)
 
-% spm_figure('GetWin','Figure 2'); clf
-% spm_MDP_VB_LFP(MDP.mdp(4).mdp.mdp,[], 1); 
-% 
+
